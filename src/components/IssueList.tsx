@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useGitHub } from '../contexts/GitHubContext';
 import IssueItem from './IssueItem';
 import { Issue } from '../services/githubService';
@@ -14,19 +14,17 @@ const IssueList: React.FC<IssueListProps> = ({ owner, repo }) => {
   const [issuesPerPage] = useState<number>(10);
   const [filter, setFilter] = useState<string>('all'); // 'all', 'open', 'closed'
 
-  useEffect(() => {
-    fetchIssues(owner, repo, currentPage, issuesPerPage, filter);
-  }, [owner, repo, currentPage, issuesPerPage, filter, fetchIssues]);
-
   // 执行查询操作
   const handleFilterChange = (newFilter: string) => {
     setFilter(newFilter);
     setCurrentPage(1);
+    fetchIssues(owner, repo, 1, issuesPerPage, newFilter);
   };
 
   //处理分页变化
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
+    fetchIssues(owner, repo, newPage, issuesPerPage, filter);
   };
 
   // 加载中

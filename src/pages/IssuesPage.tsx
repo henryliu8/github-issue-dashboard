@@ -1,17 +1,26 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useGitHub } from '../contexts/GitHubContext';
 import IssueList from '../components/IssueList';
 
 const IssuesPage: React.FC = () => {
   const { owner, repo } = useParams<{ owner: string; repo: string }>();
-  const { repository, loading, error, fetchRepository } = useGitHub();
+  const { repository, loading, error, fetchRepository, fetchIssues } = useGitHub();
+  const [showIssues, setShowIssues] = useState(false);
 
   useEffect(() => {
     if (owner && repo) {
       fetchRepository(owner, repo);
+      // 不再自动获取 issues
     }
   }, [owner, repo, fetchRepository]);
+
+  const handleViewIssues = () => {
+    if (owner && repo) {
+      fetchIssues(owner, repo);
+      setShowIssues(true);
+    }
+  };
 
   if (loading && !repository) {
     return (
@@ -71,22 +80,34 @@ const IssuesPage: React.FC = () => {
                 </span>
               </div>
             </div>
-            <a 
-              href={`https://github.com/${owner}/${repo}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-gray-800 text-white text-sm rounded-md hover:bg-gray-700 transition-colors"
-            >
-              在 GitHub 上查看
-            </a>
+            <div className="flex flex-col space-y-2">
+              <a 
+                href={`https://github.com/${owner}/${repo}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-gray-800 text-white text-sm rounded-md hover:bg-gray-700 transition-colors"
+              >
+                在 GitHub 上查看
+              </a>
+              {!showIssues && (
+                <button
+                  onClick={handleViewIssues}
+                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  查看 Issues
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-      <div className="bg-white shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-6">Issues 列表</h2>
-        {owner && repo && <IssueList owner={owner} repo={repo} />}
-      </div>
+      {showIssues && (
+        <div className="bg-white shadow-md rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-6">Issues 列表</h2>
+          {owner && repo && <IssueList owner={owner} repo={repo} />}
+        </div>
+      )}
     </div>
   );
 };
